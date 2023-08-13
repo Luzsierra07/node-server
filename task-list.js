@@ -4,6 +4,7 @@ const readline = require ("readline-sync");
 const tasks = [];
 
 const createTask =() =>{
+    return new Promise((resolve, reject) => {
     const indicator = readline.question(
         "Indicador de la tarea"
     );
@@ -11,12 +12,13 @@ const createTask =() =>{
         "Descripcion de la tarea"
     );
 
-    return{
+    resolve({
         id: tasks.length + 1,
         taskName: indicator,
         taskDescription: description,
         taskCompleted: false
-    };
+    });
+    })
 };
 
 //Mostrar lista de tareas
@@ -31,33 +33,37 @@ const showTasks = (tasks) => {
 
 //Marcar tarea completada
 const completeTask = (tasks) => {
+    return new Promise((resolve,reject)=> {
     const index = readline.questionInt(
         "Indica el numero de la tarea que deseas marcar como completada:"
     ) - 1;
     if (index >= 0 && index <tasks.length) {
         tasks[index].completed = true;
-        console.log(`La tarea "${tasks[index].indicator}" ha sido marcada como completada.`);
+        resolve(`La tarea "${tasks[index].indicator}" ha sido marcada como completada.`);
     } else {
-        console.log("Numero de tarea invalido");
+        reject("Numero de tarea invalido");
     }
+    });
 };
 
 //Eliminar tarea
 const deleteTask = (tasks) => {
+    return  new Promise ((resolve, reject)=>{
     const index = readline.questionInt(
         "Indica el numero de la tarea que deseas eliminar:"
     ) - 1;
     if (index >= 0 && index < tasks.length){
         tasks.splice(index, 1);
-        console.log("La tarea ha sido eliminada.");
+        resolve("La tarea ha sido eliminada.");
     } else {
-        console.log("Numero de tarea invalido.");
+        reject("Numero de tarea invalido.");
     }
+    });
 };
 
 //funcionalidad principal
 
-function main () {
+async function main () {
     const tasks = [];
 
     while (true) {
@@ -72,17 +78,31 @@ function main () {
 
         switch (opcion) {
             case 1:
-                const newTask = createTask();
+                try {
+                const newTask = await createTask();
                 tasks.push(newTask);
+                } catch (error){
+                    console.error(error)
+                }
                 break;
             case 2:
                 showTasks(tasks);
                 break;
             case 3:
-                completeTask(tasks);
+                try {
+                const result = await completeTask(tasks);
+                console.log(result);
+                }catch (error) {
+                    console.error(error);
+                }
                 break;
             case 4:
-                deleteTask(tasks);
+                try {
+                const result = await deleteTask(tasks);
+                console.log(result);
+                } catch (error) {
+                    console.error(error);
+                }
                 break;
             case 5:
                 console.log("¡Hasta luego!");
